@@ -1,0 +1,1 @@
+python -m zipapp src -c -o dlna.pyz

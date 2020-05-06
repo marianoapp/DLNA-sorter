@@ -1,0 +1,7 @@
+.idea
+__pycache__
+*.pyz
+*.bat
+imdb_cache.json
+testenv.py
+config.ini
