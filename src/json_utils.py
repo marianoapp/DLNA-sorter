@@ -1,9 +1,9 @@
 import urllib.request
+from urllib.error import URLError
 import ssl
 from socket import timeout
 import json
 import re
-import sys
 from logger import logger
 
 
@@ -17,21 +17,21 @@ def get_content(link):
         content = page.read()
         return content
     except timeout:
-        logger.exception("Timeout loading %s", link)
-        # print("Timeout loading ", link, sys.exc_info())
+        logger.error("Timeout loading %s", link)
+    except URLError as e:
+        logger.error("Error loading %s: %s", link, e.reason)
     except:
-        logger.exception("Failure loading %s", link)
-        # print("Failure loading ", link, sys.exc_info())
+        logger.exception("Exception loading %s", link)
 
 
 def get_json(link):
     content = get_content(link)
-    try:
-        data = json.loads(content)
-        return data
-    except:
-        logger.exception("Failure loading %s", link)
-        # print("Failure parsing", link, sys.exc_info())
+    if content:
+        try:
+            data = json.loads(content)
+            return data
+        except:
+            logger.exception("Failure loading %s", link)
 
 
 def get_json_path(root: dict, path: str):
