@@ -89,10 +89,14 @@ def get_season_node(series_node, season_number):
 
 def get_series_imdb_id(series):
     # get the imdb id from the series title
-    search_link = str.format("https://v2.sg.media-imdb.com/suggestion/f/{0}.json", series.lower().replace(" ", "_"))
-    search_data = json_utils.get_json(search_link)
-    imdb_id = json_utils.get_json_path(search_data, "d[0].id")
-    return imdb_id
+    keys = ["f", "t", "u"]
+    for key in keys:
+        search_link = str.format("https://v2.sg.media-imdb.com/suggestion/{0}/{1}.json",
+                                 key, series.lower().replace(" ", "_"))
+        search_data = json_utils.get_json(search_link)
+        if search_data:
+            imdb_id = json_utils.get_json_path(search_data, "d[0].id")
+            return imdb_id
 
 
 def get_season_episodes_imdb(imdb_id, season_number):
