@@ -59,17 +59,44 @@ def extract_subtitle(video_path, season_path, formatted_name):
         subprocess.call(parameters)
     if valid_file(subtitle_path):
         remove_sdh(subtitle_path)
+        split_long_lines(subtitle_path)
     else:
         return None
     return subtitle_path
 
 
-def remove_sdh(subtitle_path):
+def read_subtitle_file(subtitle_path):
     # open the file
     with open(subtitle_path, "r") as f:
         file_text = f.read()
     # replace CRLF with LF
     file_text = file_text.replace("\r\n", "\n")
+    # return the content
+    return file_text
+
+
+def write_subtitle_file(subtitle_path, file_text):
+    with open(subtitle_path, "w") as f:
+        f.write(file_text)
+
+
+def split_long_lines(subtitle_path):
+    file_text = read_subtitle_file(subtitle_path)
+    # regex patterns
+    patterns = [[r"([.?!]) *(-[^\-\n])", r"\1\n\2"]]
+    # apply the replacements
+    for p in patterns:
+        file_text = re.sub(p[0], p[1], file_text, flags=re.MULTILINE)
+    # save the modified text
+    write_subtitle_file(subtitle_path, file_text)
+    # TODO
+    # - find lines that are too long (how much?)
+    #   - if not, find the punctuation mark closest to the middle and split there
+    #   - if no punctuation mark could be found then split on a space
+
+
+def remove_sdh(subtitle_path):
+    file_text = read_subtitle_file(subtitle_path)
     # regex patterns
     patterns = [[r"^-?\[.+\] *\n", r""],
                 [r"^-?\[.+\n.+\]\n", r""],
@@ -91,5 +118,4 @@ def remove_sdh(subtitle_path):
     for p in patterns:
         file_text = re.sub(p[0], p[1], file_text, flags=re.MULTILINE)
     # save the modified text
-    with open(subtitle_path, "w") as f:
-        f.write(file_text)
+    write_subtitle_file(subtitle_path, file_text)
